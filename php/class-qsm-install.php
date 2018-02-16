@@ -418,6 +418,18 @@ class QSM_Install {
     );
     $mlwQuizMasterNext->pluginHelper->register_quiz_setting( $field_array, 'quiz_options' );
 
+    // Registers user_phone setting
+    $field_array = array(
+      'id' => 'require_previous_quiz',
+      'label' => __('Quiz requires completion of which Quiz ID in order to take?', 'quiz-master-next'),
+      'type' => 'number',
+      'options' => array(
+
+      ),
+      'default' => 0
+    );
+    $mlwQuizMasterNext->pluginHelper->register_quiz_setting( $field_array, 'quiz_options' );
+
     // Registers message_before setting
     $field_array = array(
       'id' => 'message_before',
@@ -716,7 +728,7 @@ class QSM_Install {
   	$quiz_table_name = $wpdb->prefix . "mlw_quizzes";
   	$question_table_name = $wpdb->prefix . "mlw_questions";
   	$results_table_name = $wpdb->prefix . "mlw_results";
-  	$audit_table_name = $wpdb->prefix . "mlw_qm_audit_trail";
+    $audit_table_name = $wpdb->prefix . "mlw_qm_audit_trail";
 
   	if( $wpdb->get_var( "SHOW TABLES LIKE '$quiz_table_name'" ) != $quiz_table_name ) {
   		$sql = "CREATE TABLE $quiz_table_name (
@@ -774,6 +786,7 @@ class QSM_Install {
   			ajax_show_correct INT NOT NULL,
   			quiz_views INT NOT NULL,
   			quiz_taken INT NOT NULL,
+        require_previous_quiz INT NOT NULL,
   			deleted INT NOT NULL,
   			PRIMARY KEY  (quiz_id)
   		) $charset_collate;";
