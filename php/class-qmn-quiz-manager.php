@@ -1151,6 +1151,35 @@ function qmn_require_login_check($display, $qmn_quiz_options, $qmn_array_for_var
 	return $display;
 }
 
+add_filter('qmn_begin_shortcode', 'qmn_require_previous_quiz', 10, 3);
+function qmn_require_previous_quiz($display, $qmn_quiz_options, $qmn_array_for_variables)
+{
+	global $qmn_allowed_visit;
+	global $wpdb;
+	if ( !is_user_logged_in() ) {
+		$qmn_allowed_visit = false;
+		$mlw_message = wpautop(htmlspecialchars_decode($qmn_quiz_options->require_log_in_text, ENT_QUOTES));
+		$mlw_message = apply_filters( 'mlw_qmn_template_variable_quiz_page', $mlw_message, $qmn_array_for_variables);
+		$mlw_message = str_replace( "\n" , "<br>", $mlw_message);
+		$display .= $mlw_message;
+		$display .= wp_login_form( array('echo' => false) );
+	
+		return $display;
+	} else if ( $qmn_quiz_options->require_previous_quiz > 0 ) {
+		$previous_quiz_id = $qmn_quiz_options->require_previous_quiz;
+		$current_user = wp_get_current_user();
+		$mlw_qmn_quiz_completed_for_user = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM ".$wpdb->prefix."mlw_results WHERE user=%d AND deleted='0' AND quiz_id=%d", $current_user->ID, $previous_quiz_id ) );
+		if ( $mlw_qmn_quiz_completed_for_user == 0) {
+			$qmn_allowed_visit = false;
+			$mlw_message = apply_filters( 'mlw_qmn_template_variable_quiz_page', $mlw_message, $qmn_array_for_variables);
+			$mlw_message = str_replace( "\n" , "<br>", $mlw_message);
+			$display .= $mlw_message;
+			$display .= "You must complete a previous quiz before taking this one";
+		}
+	}
+	return $display;
+}
+
 add_filter( 'qmn_begin_shortcode', 'qsm_scheduled_timeframe_check', 10, 3 );
 function qsm_scheduled_timeframe_check( $display, $options, $variable_data ) {
 	global $qmn_allowed_visit;
